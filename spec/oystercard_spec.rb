@@ -26,4 +26,13 @@ describe Oystercard do
       expect(subject.balance).to eq(90)
     end
   end
+
+  context '#deduct' do
+    
+    it 'can deduct the specified amount from the card' do
+      subject.top_up(40)
+      subject.deduct(7)
+      expect(subject.balance).to eq(33)
+    end
+  end
 end
