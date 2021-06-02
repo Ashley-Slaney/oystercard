@@ -28,11 +28,32 @@ describe Oystercard do
   end
 
   context '#deduct' do
+
+    it { is_expected.to respond_to(:deduct).with(1).argument }
     
     it 'can deduct the specified amount from the card' do
       subject.top_up(40)
-      subject.deduct(7)
-      expect(subject.balance).to eq(33)
+      expect { subject.deduct(7) }.to change { subject.balance }.by -7
+    end
+  end
+
+  context '#in_journey?' do
+
+    it { is_expected.to respond_to(:in_journey?) }
+
+    it 'displays false when not in journey' do
+      expect(subject).not_to be_in_journey
+    end
+
+    it 'displays true when touched in (in journey)' do
+      subject.touch_in
+      expect(subject).to be_in_journey
+    end
+
+    it 'displays false when touched out (not in journey)' do
+      subject.touch_in
+      subject.touch_out
+      expect(subject).not_to be_in_journey
     end
   end
 end
