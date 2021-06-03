@@ -3,6 +3,8 @@ require 'oystercard'
 describe Oystercard do
 
   let(:station) { double(:station) }
+  let(:entry_station) { double(:station) }
+  let(:exit_station) { double(:station) }
 
   it 'has a starting balance' do
     expect(subject.balance).to eq(0)
@@ -46,7 +48,7 @@ describe Oystercard do
     it 'displays false when touched out (not in journey)' do
       subject.top_up(10)
       subject.touch_in(station)
-      subject.touch_out
+      subject.touch_out(station)
       expect(subject).not_to be_in_journey
     end
   end
@@ -58,22 +60,37 @@ describe Oystercard do
     end
 
     it 'remembers the entry station' do
-      station = double('entry station', entry_station: 'kings cross')
-      expect(station.entry_station).to eq('kings cross')
+      subject.top_up(10)
+      expect(subject.touch_in(station)).to eq(station)
     end
-
+    
+    it 'stores the entry station' do
+      subject.top_up(10)
+      subject.touch_in(station)
+      expect(subject.entry_station).to eq(station)
+    end
   end
 
   context '#touch_out' do
 
     it 'reduces the balance on touch out' do
-      expect { subject.touch_out }.to change { subject.balance }.by(-Oystercard::MIN_BALANCE)
+      expect { subject.touch_out(station) }.to change { subject.balance }.by(-Oystercard::MIN_BALANCE)
     end
   end
 
-  it 'stores the entry station' do
-    subject.top_up(10)
-    subject.touch_in(station)
-    expect(subject.entry_station).to eq(station)
+  context '#journeys' do
+
+    let(:journey){ { entry_station: entry_station, exit_station: exit_station } }
+
+    it 'starts as an empty hash' do
+      expect(subject.journeys).to be_empty
+    end
+
+    it 'stores a journey' do
+      subject.top_up(10)
+      subject.touch_in(entry_station)
+      subject.touch_out(exit_station)
+      expect(subject.journeys).to include(journey)
+    end
   end
 end
